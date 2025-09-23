@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Recorder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+            flex: 1;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 12px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background-color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.recording {
+            background-color: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .settings-panel {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section h3 {
+            color: #2c3e50;
+            margin-bottom: 18px;
+            font-size: 1.25em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            font-size: 1.05em;
+        }
+
+        label:hover {
+            background-color: #f8f9fa;
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            font-size: 1.05em;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .preview-panel {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .preview-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .preview-screen {
+            background-color: #2c3e50;
+            height: 600px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .preview-screen .record-indicator {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .record-dot {
+            width: 24px;
+            height: 24px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .timer {
+            font-size: 3.5em;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .preview-message {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .preview-submessage {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .preview-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.95em;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-start {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-stop {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .btn-pause {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-resume {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-download {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin-top: auto;
+            font-size: 1em;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .shortcuts-hint {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shortcuts-hint strong {
+            color: #704000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Screen Recorder</h1>
+            <div class="subtitle">전문 화면 녹화 도구 v1.0</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">준비됨</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="settings-panel">
+                <div class="settings-section">
+                    <h3>🖥️ 녹화 대상</h3>
+                    <div class="settings-group">
+                        <label>
+                            <input type="radio" name="source" value="fullscreen" checked>
+                            <span>전체 화면</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="source" value="window">
+                            <span>특정 창</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="source" value="tab">
+                            <span>브라우저 탭</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📹 비디오 품질</h3>
+                    <select id="quality">
+                        <option value="8k">8K (7680×4320) - 최고 품질</option>
+                        <option value="4k">4K (3840×2160) - 초고화질</option>
+                        <option value="2k">2K (2560×1440) - 고화질</option>
+                        <option value="fhd" selected>Full HD (1920×1080) - 권장</option>
+                        <option value="hd">HD (1280×720) - 표준</option>
+                        <option value="sd">SD (854×480) - 저용량</option>
+                    </select>
+                    <div style="margin-top: 18px;">
+                        <label style="display: block; margin-bottom: 10px; padding: 0;">프레임 레이트</label>
+                        <select id="framerate">
+                            <option value="15">15 FPS - 프레젠테이션</option>
+                            <option value="24">24 FPS - 영화</option>
+                            <option value="30" selected>30 FPS - 표준</option>
+                            <option value="60">60 FPS - 고품질</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🎤 오디오 설정</h3>
+                    <div class="settings-group">
+                        <label>
+                            <input type="checkbox" id="microphone" checked>
+                            <span>마이크 녹음</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="system-audio" checked>
+                            <span>시스템 소리</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📷 웹캠 설정</h3>
+                    <label>
+                        <input type="checkbox" id="webcam">
+                        <span>웹캠 포함 (PIP)</span>
+                    </label>
+                    <select id="webcam-position" style="margin-top: 12px;" disabled>
+                        <option value="top-right">우상단</option>
+                        <option value="top-left">좌상단</option>
+                        <option value="bottom-right">우하단</option>
+                        <option value="bottom-left">좌하단</option>
+                    </select>
+                </div>
+
+                <div class="settings-section">
+                    <h3>💾 출력 형식</h3>
+                    <select id="format">
+                        <option value="webm" selected>WEBM (권장)</option>
+                        <option value="mp4">MP4</option>
+                        <option value="mkv">MKV</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <h3>📺 녹화 미리보기</h3>
+                <div class="shortcuts-hint">
+                    <span>💡</span>
+                    <span><strong>단축키:</strong> Alt+R (녹화 시작/중지), Alt+P (일시정지/재개)</span>
+                </div>
+                <div class="preview-screen">
+                    <div class="record-indicator" style="display: none;" id="recordIndicator">
+                        <div class="record-dot"></div>
+                        <span>REC</span>
+                    </div>
+                    <div class="timer" id="timer">00:00:00</div>
+                    <div class="preview-message">🎬 녹화 준비 중</div>
+                    <div class="preview-submessage">녹화 시작 버튼을 클릭하여 화면 녹화를 시작하세요</div>
+                </div>
+                <div class="preview-info">
+                    <div class="info-item">
+                        <span class="info-label">녹화 시간</span>
+                        <span class="info-value" id="recordTime">00:00:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">파일 크기</span>
+                        <span class="info-value" id="fileSize">0 MB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">해상도</span>
+                        <span class="info-value" id="resolution">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">코덱</span>
+                        <span class="info-value" id="codec">VP8/Opus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn">
+                🔴 녹화 시작
+            </button>
+            <button class="btn btn-stop" id="stopBtn" disabled>
+                ⏹️ 녹화 중지
+            </button>
+            <button class="btn btn-pause" id="pauseBtn" disabled>
+                ⏸️ 일시정지
+            </button>
+            <button class="btn btn-resume" id="resumeBtn" style="display: none;">
+                ▶️ 재개
+            </button>
+            <button class="btn btn-download" id="downloadBtn" disabled>
+                💾 다운로드
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <span>©</span>
+            <span>사하구청 All Rights Reserved.</span>
+        </div>
+    </footer>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let startTime;
+        let timerInterval;
+        let isPaused = false;
+        let pausedTime = 0;
+        let pauseStartTime;
+
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const timer = document.getElementById('timer');
+        const recordTime = document.getElementById('recordTime');
+        const fileSize = document.getElementById('fileSize');
+        const resolution = document.getElementById('resolution');
+        const recordIndicator = document.getElementById('recordIndicator');
+        const webcamCheckbox = document.getElementById('webcam');
+        const webcamPosition = document.getElementById('webcam-position');
+        const previewScreen = document.querySelector('.preview-screen');
+
+        webcamCheckbox.addEventListener('change', () => {
+            webcamPosition.disabled = !webcamCheckbox.checked;
+        });
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            if (!isPaused) {
+                const elapsed = (Date.now() - startTime - pausedTime) / 1000;
+                const timeStr = formatTime(elapsed);
+                timer.textContent = timeStr;
+                recordTime.textContent = timeStr;
+                
+                const estimatedSize = (elapsed * 0.5).toFixed(1);
+                fileSize.textContent = `${estimatedSize} MB`;
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const sourceType = document.querySelector('input[name="source"]:checked').value;
+                const quality = document.getElementById('quality').value;
+                const includeMic = document.getElementById('microphone').checked;
+                const includeSystem = document.getElementById('system-audio').checked;
+                
+                const constraints = {
+                    video: {
+                        width: { ideal: getResolution(quality).width },
+                        height: { ideal: getResolution(quality).height },
+                        frameRate: { ideal: parseInt(document.getElementById('framerate').value) }
+                    },
+                    audio: includeMic || includeSystem
+                };
+
+                stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+                
+                if (includeMic) {
+                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const audioTrack = audioStream.getAudioTracks()[0];
+                    stream.addTrack(audioTrack);
+                }
+
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp8,opus'
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `recording_${new Date().getTime()}.webm`;
+                    downloadBtn.onclick = () => a.click();
+                    downloadBtn.disabled = false;
+                };
+
+                mediaRecorder.start();
+                startTime = Date.now();
+                pausedTime = 0;
+                
+                timerInterval = setInterval(updateTimer, 100);
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                pauseBtn.disabled = false;
+                statusDot.classList.add('recording');
+                statusText.textContent = '녹화 중';
+                recordIndicator.style.display = 'flex';
+                
+                // 미리보기 화면 텍스트 변경
+                document.querySelector('.preview-message').textContent = '🔴 녹화 진행 중';
+                document.querySelector('.preview-submessage').textContent = '화면이 녹화되고 있습니다';
+                
+                const videoTrack = stream.getVideoTracks()[0];
+                const settings = videoTrack.getSettings();
+                resolution.textContent = `${settings.width}×${settings.height}`;
+                
+            } catch (err) {
+                console.error('Error starting recording:', err);
+                alert('화면 녹화를 시작할 수 없습니다. 권한을 확인해주세요.');
+            }
+        }
+
+        function getResolution(quality) {
+            const resolutions = {
+                '8k': { width: 7680, height: 4320 },
+                '4k': { width: 3840, height: 2160 },
+                '2k': { width: 2560, height: 1440 },
+                'fhd': { width: 1920, height: 1080 },
+                'hd': { width: 1280, height: 720 },
+                'sd': { width: 854, height: 480 }
+            };
+            return resolutions[quality] || resolutions['fhd'];
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                stream.getTracks().forEach(track => track.stop());
+                
+                clearInterval(timerInterval);
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                pauseBtn.disabled = true;
+                resumeBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-flex';
+                statusDot.classList.remove('recording');
+                statusText.textContent = '준비됨';
+                recordIndicator.style.display = 'none';
+                isPaused = false;
+                
+                // 미리보기 화면 텍스트 복원
+                document.querySelector('.preview-message').textContent = '🎬 녹화 준비 중';
+                document.querySelector('.preview-submessage').textContent = '녹화 시작 버튼을 클릭하여 화면 녹화를 시작하세요';
+            }
+        }
+
+        function pauseRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.pause();
+                isPaused = true;
+                pauseStartTime = Date.now();
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = 'inline-flex';
+                statusText.textContent = '일시정지됨';
+                
+                // 미리보기 화면 텍스트 변경
+                document.querySelector('.preview-message').textContent = '⏸️ 일시정지됨';
+                document.querySelector('.preview-submessage').textContent = '재개 버튼을 클릭하여 계속 녹화하세요';
+            }
+        }
+
+        function resumeRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'paused') {
+                mediaRecorder.resume();
+                isPaused = false;
+                pausedTime += Date.now() - pauseStartTime;
+                resumeBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-flex';
+                statusText.textContent = '녹화 중';
+                
+                // 미리보기 화면 텍스트 변경
+                document.querySelector('.preview-message').textContent = '🔴 녹화 진행 중';
+                document.querySelector('.preview-submessage').textContent = '화면이 녹화되고 있습니다';
+            }
+        }
+
+        // 키보드 단축키 지원
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey) {
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    if (!startBtn.disabled) {
+                        startRecording();
+                    } else if (!stopBtn.disabled) {
+                        stopRecording();
+                    }
+                } else if (e.key === 'p' || e.key === 'P') {
+                    e.preventDefault();
+                    if (!pauseBtn.disabled && pauseBtn.style.display !== 'none') {
+                        pauseRecording();
+                    } else if (resumeBtn.style.display !== 'none') {
+                        resumeRecording();
+                    }
+                }
+            }
+        });
+
+        startBtn.addEventListener('click', startRecording);
+        stopBtn.addEventListener('click', stopRecording);
+        pauseBtn.addEventListener('click', pauseRecording);
+        resumeBtn.addEventListener('click', resumeRecording);
+    </script>
+</body>
+</html>
