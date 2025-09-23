@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Recorder Pro - 전문 화면 녹화 도구</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        /* 헤더 */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 40px;
+            gap: 30px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 설정 패널 */
+        .settings-panel {
+            flex: 0 0 380px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* 라디오 버튼 그룹 */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .radio-option:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .radio-option.selected {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+        }
+
+        .radio-option input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        /* 선택 박스 */
+        .select-box {
+            width: 100%;
+            padding: 12px 15px;
+            background: #f8f8f8;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-box:hover, .select-box:focus {
+            border-color: #667eea;
+            background: white;
+            outline: none;
+        }
+
+        /* 체크박스 */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-option:hover {
+            background: #f0f0f0;
+        }
+
+        .checkbox-option input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .pip-position {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pip-option {
+            padding: 10px;
+            background: #f8f8f8;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .pip-option:hover {
+            background: #f0f0f0;
+        }
+
+        .pip-option.selected {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+        }
+
+        /* 미리보기 영역 */
+        .preview-area {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recording-timer {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #ff4444;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            animation: blink 1s infinite;
+        }
+
+        .recording-timer.active {
+            display: flex;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .preview-content {
+            flex: 1;
+            background: #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        #preview-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .preview-placeholder i {
+            font-size: 64px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        /* 컨트롤 바 */
+        .control-bar {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-stop {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-pause {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-pause:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
+        }
+
+        .btn-resume {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-resume:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* 정보 패널 */
+        .info-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .info-panel.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* 알림 메시지 */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ff4444;
+        }
+
+        .notification.info {
+            border-left: 4px solid #2196F3;
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 웹캠 미리보기 */
+        #webcam-preview {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            border-radius: 8px;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: none;
+            object-fit: cover;
+        }
+
+        #webcam-preview.top-right {
+            top: 20px;
+            right: 20px;
+        }
+
+        #webcam-preview.top-left {
+            top: 20px;
+            left: 20px;
+        }
+
+        #webcam-preview.bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        #webcam-preview.bottom-left {
+            bottom: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🎬</div>
+            <div class="logo-text">
+                <h1>Screen Recorder Pro</h1>
+                <p>전문 화면 녹화 도구 v1.0</p>
+            </div>
+        </div>
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>준비됨</span>
+            </div>
+            <div class="status-indicator" style="display: none;" id="recording-status">
+                <div class="status-dot" style="background: #ff4444;"></div>
+                <span>녹화 중</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+        <!-- 설정 패널 -->
+        <div class="settings-panel">
+            <!-- 녹화 대상 설정 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="section-icon">🖥️</div>
+                    <span>녹화 대상</span>
+                </div>
+                <div class="radio-group">
+                    <div class="radio-option selected">
+                        <input type="radio" id="screen-full" name="capture-type" value="screen" checked>
+                        <label for="screen-full">전체 화면</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="screen-window" name="capture-type" value="window">
+                        <label for="screen-window">특정 창</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="screen-tab" name="capture-type" value="browser">
+                        <label for="screen-tab">브라우저 탭</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 비디오 품질 설정 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="section-icon">📹</div>
+                    <span>비디오 품질</span>
+                </div>
+                <select class="select-box" id="quality-select">
+                    <option value="4320">8K (7680×4320) - 최고 품질</option>
+                    <option value="2160">4K (3840×2160) - 초고화질</option>
+                    <option value="1440">2K (2560×1440) - 고화질</option>
+                    <option value="1080" selected>Full HD (1920×1080) - 권장</option>
+                    <option value="720">HD (1280×720) - 표준</option>
+                    <option value="480">SD (854×480) - 저용량</option>
+                </select>
+                <div style="margin-top: 15px;">
+                    <label style="font-size: 14px; color: #666;">프레임 레이트</label>
+                    <select class="select-box" id="fps-select" style="margin-top: 8px;">
+                        <option value="15">15 FPS - 프레젠테이션</option>
+                        <option value="24">24 FPS - 영화</option>
+                        <option value="30" selected>30 FPS - 표준</option>
+                        <option value="60">60 FPS - 고품질</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 오디오 설정 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="section-icon">🎤</div>
+                    <span>오디오 설정</span>
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="audio-mic" checked>
+                        <label for="audio-mic">마이크 녹음</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="audio-system" checked>
+                        <label for="audio-system">시스템 소리</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 웹캠 설정 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="section-icon">📷</div>
+                    <span>웹캠 설정</span>
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="webcam-enable">
+                        <label for="webcam-enable">웹캠 포함 (PIP)</label>
+                    </div>
+                </div>
+                <div class="pip-position" id="pip-position" style="display: none;">
+                    <div class="pip-option selected" data-position="top-right">우상단</div>
+                    <div class="pip-option" data-position="top-left">좌상단</div>
+                    <div class="pip-option" data-position="bottom-right">우하단</div>
+                    <div class="pip-option" data-position="bottom-left">좌하단</div>
+                </div>
+            </div>
+
+            <!-- 출력 설정 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="section-icon">💾</div>
+                    <span>출력 형식</span>
+                </div>
+                <select class="select-box" id="format-select">
+                    <option value="webm" selected>WEBM (권장)</option>
+                    <option value="mp4">MP4</option>
+                    <option value="mkv">MKV</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 미리보기 영역 -->
+        <div class="preview-area">
+            <div class="preview-header">
+                <div class="preview-title">
+                    <span>📺</span>
+                    <span>녹화 미리보기</span>
+                </div>
+                <div class="recording-timer" id="recording-timer">
+                    <span>●</span>
+                    <span id="timer-display">00:00:00</span>
+                </div>
+            </div>
+            
+            <div class="preview-content">
+                <video id="preview-video" style="display: none;" autoplay muted></video>
+                <video id="webcam-preview" style="display: none;" autoplay muted></video>
+                <div class="preview-placeholder" id="preview-placeholder">
+                    <i>🎬</i>
+                    <h3>녹화 준비 중</h3>
+                    <p>녹화 시작 버튼을 클릭하여 화면 녹화를 시작하세요</p>
+                </div>
+            </div>
+
+            <!-- 정보 패널 -->
+            <div class="info-panel" id="info-panel">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">녹화 시간</span>
+                        <span class="info-value" id="info-duration">00:00:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">파일 크기</span>
+                        <span class="info-value" id="info-size">0 MB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">해상도</span>
+                        <span class="info-value" id="info-resolution">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">코덱</span>
+                        <span class="info-value" id="info-codec">VP8/Opus</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 컨트롤 바 -->
+            <div class="control-bar">
+                <button class="control-btn btn-start" id="btn-start">
+                    <span>🔴</span>
+                    <span>녹화 시작</span>
+                </button>
+                <button class="control-btn btn-stop" id="btn-stop" style="display: none;" disabled>
+                    <span>⏹️</span>
+                    <span>녹화 중지</span>
+                </button>
+                <button class="control-btn btn-pause" id="btn-pause" style="display: none;" disabled>
+                    <span>⏸️</span>
+                    <span>일시정지</span>
+                </button>
+                <button class="control-btn btn-resume" id="btn-resume" style="display: none;" disabled>
+                    <span>▶️</span>
+                    <span>재개</span>
+                </button>
+                <button class="control-btn btn-download" id="btn-download" style="display: none;" disabled>
+                    <span>💾</span>
+                    <span>다운로드</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 메시지 -->
+    <div class="notification" id="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // 전역 변수
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let stream = null;
+        let webcamStream = null;
+        let startTime = null;
+        let timerInterval = null;
+        let isPaused = false;
+        let pausedTime = 0;
+        let currentPipPosition = 'top-right';
+
+        // DOM 요소
+        const btnStart = document.getElementById('btn-start');
+        const btnStop = document.getElementById('btn-stop');
+        const btnPause = document.getElementById('btn-pause');
+        const btnResume = document.getElementById('btn-resume');
+        const btnDownload = document.getElementById('btn-download');
+        const previewVideo = document.getElementById('preview-video');
+        const webcamPreview = document.getElementById('webcam-preview');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const recordingTimer = document.getElementById('recording-timer');
+        const timerDisplay = document.getElementById('timer-display');
+        const recordingStatus = document.getElementById('recording-status');
+        const infoPanel = document.getElementById('info-panel');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+
+        // 라디오 버튼 선택 효과
+        document.querySelectorAll('.radio-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                const groupName = radio.name;
+                
+                document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                    r.closest('.radio-option').classList.remove('selected');
+                });
+                
+                this.classList.add('selected');
+                radio.checked = true;
+            });
+        });
+
+        // 웹캠 체크박스 이벤트
+        document.getElementById('webcam-enable').addEventListener('change', function() {
+            const pipPosition = document.getElementById('pip-position');
+            if (this.checked) {
+                pipPosition.style.display = 'grid';
+            } else {
+                pipPosition.style.display = 'none';
+                stopWebcam();
+            }
+        });
+
+        // PIP 위치 선택
+        document.querySelectorAll('.pip-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.pip-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                currentPipPosition = this.dataset.position;
+                
+                if (webcamPreview.style.display !== 'none') {
+                    webcamPreview.className = currentPipPosition;
+                }
+            });
+        });
+
+        // 알림 표시 함수
+        function showNotification(message, type = 'info') {
+            notificationMessage.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // 타이머 업데이트 함수
+        function updateTimer() {
+            if (!isPaused && startTime) {
+                const elapsed = Date.now() - startTime - pausedTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerDisplay.textContent = timeString;
+                document.getElementById('info-duration').textContent = timeString;
+                
+                // 파일 크기 추정 (대략적인 계산)
+                const estimatedSize = (elapsed / 1000) * 0.5; // MB
+                document.getElementById('info-size').textContent = `${estimatedSize.toFixed(1)} MB (추정)`;
+            }
+        }
+
+        // 웹캠 시작
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: false 
+                });
+                webcamPreview.srcObject = webcamStream;
+                webcamPreview.style.display = 'block';
+                webcamPreview.className = currentPipPosition;
+            } catch (err) {
+                console.error('웹캠 접근 실패:', err);
+                showNotification('웹캠을 시작할 수 없습니다', 'error');
+                document.getElementById('webcam-enable').checked = false;
+            }
+        }
+
+        // 웹캠 중지
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+                webcamPreview.style.display = 'none';
+            }
+        }
+
+        // 녹화 시작
+        btnStart.addEventListener('click', async () => {
+            try {
+                const captureType = document.querySelector('input[name="capture-type"]:checked').value;
+                const audioMic = document.getElementById('audio-mic').checked;
+                const audioSystem = document.getElementById('audio-system').checked;
+                const webcamEnabled = document.getElementById('webcam-enable').checked;
+                
+                // 화면 캡처 옵션
+                const displayMediaOptions = {
+                    video: {
+                        cursor: "always",
+                        displaySurface: captureType === 'browser' ? 'browser' : 
+                                       captureType === 'window' ? 'window' : 'monitor'
+                    },
+                    audio: audioSystem
+                };
+
+                // 화면 스트림 가져오기
+                stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                
+                // 마이크 오디오 추가
+                if (audioMic) {
+                    try {
+                        const audioStream = await navigator.mediaDevices.getUserMedia({ 
+                            audio: true, 
+                            video: false 
+                        });
+                        
+                        // 오디오 트랙 추가
+                        audioStream.getAudioTracks().forEach(track => {
+                            stream.addTrack(track);
+                        });
+                    } catch (err) {
+                        console.error('마이크 접근 실패:', err);
+                        showNotification('마이크를 사용할 수 없습니다', 'error');
+                    }
+                }
+
+                // 웹캠 시작
+                if (webcamEnabled) {
+                    await startWebcam();
+                }
+
+                // 미리보기 표시
+                previewVideo.srcObject = stream;
+                previewVideo.style.display = 'block';
+                previewPlaceholder.style.display = 'none';
+
+                // 해상도 정보 업데이트
+                const videoTrack = stream.getVideoTracks()[0];
+                const settings = videoTrack.getSettings();
+                document.getElementById('info-resolution').textContent = `${settings.width}×${settings.height}`;
+
+                // MediaRecorder 설정
+                const format = document.getElementById('format-select').value;
+                const mimeType = format === 'mp4' ? 'video/mp4' : 'video/webm';
+                
+                const options = {
+                    mimeType: mimeType
+                };
+
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    
+                    previewVideo.srcObject = null;
+                    previewVideo.src = url;
+                    previewVideo.controls = true;
+                    
+                    // 다운로드 버튼 활성화
+                    btnDownload.disabled = false;
+                    btnDownload.style.display = 'inline-flex';
+                    
+                    // 다운로드 준비
+                    btnDownload.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `recording_${new Date().getTime()}.${format}`;
+                        a.click();
+                        showNotification('녹화 파일이 다운로드되었습니다', 'success');
+                    };
+                };
+
+                // 녹화 시작
+                mediaRecorder.start();
+                startTime = Date.now();
+                isPaused = false;
+                pausedTime = 0;
+                
+                // UI 업데이트
+                btnStart.style.display = 'none';
+                btnStop.style.display = 'inline-flex';
+                btnPause.style.display = 'inline-flex';
+                btnStop.disabled = false;
+                btnPause.disabled = false;
+                recordingTimer.classList.add('active');
+                recordingStatus.style.display = 'flex';
+                infoPanel.classList.add('active');
+                
+                // 타이머 시작
+                timerInterval = setInterval(updateTimer, 100);
+                
+                showNotification('녹화가 시작되었습니다', 'success');
+                
+                // 스트림 종료 감지
+                stream.getVideoTracks()[0].onended = () => {
+                    stopRecording();
+                };
+                
+            } catch (err) {
+                console.error('녹화 시작 실패:', err);
+                showNotification('화면 공유가 취소되었거나 권한이 없습니다', 'error');
+            }
+        });
+
+        // 녹화 중지
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            stopWebcam();
+            
+            // 타이머 중지
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // UI 초기화
+            btnStart.style.display = 'inline-flex';
+            btnStop.style.display = 'none';
+            btnPause.style.display = 'none';
+            btnResume.style.display = 'none';
+            recordingTimer.classList.remove('active');
+            recordingStatus.style.display = 'none';
+            
+            showNotification('녹화가 완료되었습니다', 'success');
+        }
+
+        btnStop.addEventListener('click', stopRecording);
+
+        // 일시정지
+        btnPause.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.pause();
+                isPaused = true;
+                pausedTime += Date.now() - startTime;
+                
+                btnPause.style.display = 'none';
+                btnResume.style.display = 'inline-flex';
+                btnResume.disabled = false;
+                
+                showNotification('녹화가 일시정지되었습니다', 'info');
+            }
+        });
+
+        // 재개
+        btnResume.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'paused') {
+                mediaRecorder.resume();
+                isPaused = false;
+                startTime = Date.now();
+                
+                btnResume.style.display = 'none';
+                btnPause.style.display = 'inline-flex';
+                
+                showNotification('녹화가 재개되었습니다', 'info');
+            }
+        });
+
+        // 페이지 언로드 시 정리
+        window.addEventListener('beforeunload', (e) => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                e.preventDefault();
+                e.returnValue = '녹화가 진행 중입니다. 페이지를 나가시겠습니까?';
+            }
+        });
+
+        // 초기 상태 메시지
+        showNotification('Screen Recorder Pro가 준비되었습니다', 'success');
+    </script>
+</body>
+</html>
